@@ -9,3 +9,6 @@
 
 [TYPECHECK]
   disable=bad-option-value,
+
+disable=F0002,
+
