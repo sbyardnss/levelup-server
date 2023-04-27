@@ -15,6 +15,8 @@ class EventView(ViewSet):
     def list(self, request):
         """handle GET request for all events"""
         events = Event.objects.all()
+        if "game" in request.query_params:
+            events = events.filter(game = request.query_params['game'])
         serializer = EventSerializer(events, many=True)
         return Response(serializer.data)
 
@@ -23,4 +25,4 @@ class EventSerializer(serializers.ModelSerializer):
     """JSON serializer for eventview"""
     class Meta:
         model = Event
-        fields = ('id', 'description', 'date', 'time', 'organizer', 'attendees')
+        fields = ('id', 'description', 'date', 'time', 'organizer', 'attendees' , 'game')
