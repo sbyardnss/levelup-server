@@ -1,0 +1,14 @@
+[
+    {
+        "model": "levelupapi.game",
+        "pk": 1,
+        "fields": {
+            "title": "Settlers of Catan",
+            "maker": "Klaus Teuber",
+            "number_of_players": 4,
+            "skill_level": 3,
+            "type": 1,
+            "gamer": 1
+        }
+    }
+]
