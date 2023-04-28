@@ -22,6 +22,7 @@ class GameView(ViewSet):
 
     def create(self, request):
         """handle POST request for games"""
+        print(request.data)
         gamer = Gamer.objects.get(user=request.auth.user)
         game_type = Gametype.objects.get(pk=request.data['game_type'])
         game = Game.objects.create(

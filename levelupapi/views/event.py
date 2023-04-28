@@ -22,9 +22,9 @@ class EventView(ViewSet):
         return Response(serializer.data)
     def create(self, request):
         """handle POST request for events"""
+        print(request.data)
         gamer = Gamer.objects.get(user=request.auth.user)
         game = Game.objects.get(pk=request.data['game'])
-        print(request.data)
         event = Event.objects.create(
             description=request.data['description'],
             date=request.data['date'],
