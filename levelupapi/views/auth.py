@@ -37,16 +37,16 @@ def login_user(request):
 
 
 @api_view(['POST'])
-@permission_classes(['AllowAny'])
+@permission_classes([AllowAny])
 def register_user(request):
     '''Handles the creation of a new gamer for authentication
 
     Method arguments:
     request -- The full HTTP request object
     '''
-
     # Create a new user by invoking the `create_user` helper method
     # on Django's built-in User model
+    print(request.data)
     new_user = User.objects.create_user(
         username=request.data['username'],
         password=request.data['password'],
