@@ -3,20 +3,29 @@ from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework import serializers, status
 from levelupapi.models import Game, Gamer, Gametype
-
+from django.db.models import Count, Q
 
 class GameView(ViewSet):
     """game view"""
 
     def retrieve(self, request, pk=None):
         """handle GET requests for single game"""
-        game = Game.objects.get(pk=pk)
-        serializer = GameSerializer(game)
-        return Response(serializer.data)
+        try:
+            game = Game.objects.get(pk=pk)
+            serializer = GameSerializer(game)
+            return Response(serializer.data)
+        except Game.DoesNotExist as ex:
+            return Response({'message': ex.args[0]}, status=status.HTTP_404_NOT_FOUND)
 
     def list(self, request):
         """handle GET requests for all games"""
-        games = Game.objects.all()
+        # games = Game.objects.all()
+        # why does the code below use the games variable name again?
+        gamer = Gamer.objects.get(user=request.auth.user)
+        games = Game.objects.annotate(event_count=Count('events'), user_event_count=Count('events', filter=Q(events__organizer=gamer)))
+        game_type = request.query_params.get('type', None)
+        if game_type is not None:
+            games = games.filter(type=game_type)
         serializer = GameSerializer(games, many=True)
         return Response(serializer.data)
 
@@ -58,6 +67,9 @@ class GameView(ViewSet):
 
 class GameSerializer(serializers.ModelSerializer):
     """serializer for gameview"""
+    event_count = serializers.IntegerField(default=None)
+    user_event_count = serializers.IntegerField(default=None)
     class Meta:
         model = Game
-        fields = ('id', 'title', 'number_of_players', 'maker', 'skill_level', 'type', 'gamer')
+        fields = ('id', 'title', 'number_of_players', 'maker', 'skill_level', 'type', 'gamer', 'event_count', 'user_event_count')
+        depth = 1
