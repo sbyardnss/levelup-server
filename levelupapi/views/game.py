@@ -29,22 +29,30 @@ class GameView(ViewSet):
         serializer = GameSerializer(games, many=True)
         return Response(serializer.data)
 
-    def create(self, request):
-        """handle POST request for games"""
-        print(request.data)
-        gamer = Gamer.objects.get(user=request.auth.user)
-        game_type = Gametype.objects.get(pk=request.data['game_type'])
-        game = Game.objects.create(
-            title=request.data['title'],
-            maker=request.data['maker'],
-            number_of_players=request.data['number_of_players'],
-            skill_level=request.data['skill_level'],
-            gamer=gamer,
-            type=game_type
-        )
-        serializer = GameSerializer(game)
-        return Response(serializer.data)
+    # OLD CREATE BEFORE VALIDATION SERIALIZER
+    # def create(self, request):
+    #     """handle POST request for games"""
+    #     print(request.data)
+    #     gamer = Gamer.objects.get(user=request.auth.user)
+    #     game_type = Gametype.objects.get(pk=request.data['game_type'])
+    #     game = Game.objects.create(
+    #         title=request.data['title'],
+    #         maker=request.data['maker'],
+    #         number_of_players=request.data['number_of_players'],
+    #         skill_level=request.data['skill_level'],
+    #         gamer=gamer,
+    #         type=game_type
+    #     )
+    #     serializer = GameSerializer(game)
+    #     return Response(serializer.data)
 
+    def create(self, request):
+        """handle POST request for gamers"""
+        gamer = Gamer.objects.get(user=request.auth.user)
+        serializer = CreateGameSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(gamer=gamer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
     def update(self, request, pk):
         """handle PUT requests for games"""
         game = Game.objects.get(pk=pk)
@@ -53,8 +61,8 @@ class GameView(ViewSet):
         game.number_of_players = request.data['number_of_players']
         game.skill_level = request.data['skill_level']
 
-        game_type = Gametype.objects.get(pk=request.data['game_type'])
-        game.game_type = game_type
+        game_type = Gametype.objects.get(pk=request.data['type'])
+        game.type = game_type
         game.save()
         return Response(None, status=status.HTTP_204_NO_CONTENT)
 
@@ -64,6 +72,10 @@ class GameView(ViewSet):
         game.delete()
         return Response(None, status=status.HTTP_204_NO_CONTENT)
 
+class CreateGameSerializer(serializers. ModelSerializer):
+    class Meta:
+        model = Game
+        fields = ['id', 'title', 'maker', 'number_of_players', 'skill_level', 'type']
 
 class GameSerializer(serializers.ModelSerializer):
     """serializer for gameview"""

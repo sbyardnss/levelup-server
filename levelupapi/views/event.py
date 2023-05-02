@@ -5,6 +5,7 @@ from rest_framework import serializers, status
 from levelupapi.models import Event, Gamer, Game
 from rest_framework.decorators import action
 from django.db.models import Count, Q
+from django.core.exceptions import ValidationError
 
 class EventView(ViewSet):
     """level up event view"""
@@ -33,19 +34,32 @@ class EventView(ViewSet):
         serializer = EventSerializer(events, many=True)
         return Response(serializer.data)
 
+    # OLD VERSION WITHOUT VALIDATION
+    # def create(self, request):
+    #     """handle POST request for events"""
+    #     gamer = Gamer.objects.get(user=request.auth.user)
+    #     game = Game.objects.get(pk=request.data['game'])
+    #     event = Event.objects.create(
+    #         description=request.data['description'],
+    #         date=request.data['date'],
+    #         time=request.data['time'],
+    #         organizer=gamer,
+    #         game=game
+    #     )
+    #     serializer = EventSerializer(event)
+    #     return Response(serializer.data)
+
     def create(self, request):
-        """handle POST request for events"""
-        gamer = Gamer.objects.get(user=request.auth.user)
+        """handle POST request with validation"""
+        organizer = Gamer.objects.get(user=request.auth.user)
         game = Game.objects.get(pk=request.data['game'])
-        event = Event.objects.create(
-            description=request.data['description'],
-            date=request.data['date'],
-            time=request.data['time'],
-            organizer=gamer,
-            game=game
-        )
-        serializer = EventSerializer(event)
-        return Response(serializer.data)
+        # description=request.data['description']
+        # date=request.data['date']
+        # time=request.data['time']
+        serializer = CreateEventSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(game=game, organizer=organizer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def update(self, request, pk):
         """handle PUT requests for events"""
@@ -89,6 +103,11 @@ class GamerSerializer(serializers.ModelSerializer):
         model = Gamer
         fields = ('id', 'full_name')
 
+class CreateEventSerializer(serializers.ModelSerializer):
+    """serializer for creating game"""
+    class Meta:
+        model = Event
+        fields =('id', 'description', 'date', 'time', 'game')
 
 class EventSerializer(serializers.ModelSerializer):
     """JSON serializer for eventview"""
