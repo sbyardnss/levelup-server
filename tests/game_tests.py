@@ -81,7 +81,7 @@ class GameTests(APITestCase):
 
         # DEFINE NEW PROPERTIES FOR GAME
         data = {
-            "type_id": 1,
+            "type": 1,
             "skill_level": 2,
             "title": "Sorry",
             "maker": "Hasbro",
