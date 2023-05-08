@@ -56,6 +56,7 @@ class EventView(ViewSet):
         # description=request.data['description']
         # date=request.data['date']
         # time=request.data['time']
+
         serializer = CreateEventSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save(game=game, organizer=organizer)
@@ -117,6 +118,5 @@ class EventSerializer(serializers.ModelSerializer):
         model = Event
         fields = ('id', 'description', 'date', 'time',
                   'organizer', 'attendees', 'game', 'joined', 'attendee_count')
-        depth = 2
 
 
