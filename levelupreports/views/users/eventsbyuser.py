@@ -9,12 +9,9 @@ class UserEventList(View):
         with connection.cursor() as db_cursor:
             db_cursor.execute("""
                 SELECT 
-                    *,
-                    u.first_name || ' ' || u.last_name as `full_name`,
-                    g.id
-                FROM levelupapi_event e
-                JOIN levelupapi_gamer g on g.id = e.organizer_id
-                JOIN auth_user u on u.id = g.user_id
+                    *
+                FROM
+                    EVENTS_BY_USER
                 """)
             dataset = dict_fetch_all(db_cursor)
             events_by_user = []
@@ -26,7 +23,6 @@ class UserEventList(View):
                     'organizer': row['organizer_id'],
                     'game': row['game_id']
                 }
-                print(dataset)
                 user_dict = None
                 for user_event in events_by_user:
                     if user_event['organizer_id'] == row['organizer_id']:

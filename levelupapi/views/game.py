@@ -4,10 +4,13 @@ from rest_framework.response import Response
 from rest_framework import serializers, status
 from levelupapi.models import Game, Gamer, Gametype
 from django.db.models import Count, Q
-
+from rest_framework.permissions import DjangoModelPermissions
+from rest_framework import permissions
+from levelupapi.permission import UserCreatedGameOrDelete
 class GameView(ViewSet):
     """game view"""
-
+    permission_classes = [ UserCreatedGameOrDelete ]
+    queryset = Game.objects.none()
     def retrieve(self, request, pk=None):
         """handle GET requests for single game"""
         try:
@@ -52,6 +55,7 @@ class GameView(ViewSet):
         serializer = CreateGameSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save(gamer=gamer)
+        print(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     def update(self, request, pk):
         """handle PUT requests for games"""
@@ -63,12 +67,14 @@ class GameView(ViewSet):
 
         game_type = Gametype.objects.get(pk=request.data['type'])
         game.type = game_type
+        self.check_object_permissions(request, game)
         game.save()
         return Response(None, status=status.HTTP_204_NO_CONTENT)
 
     def destroy(self, request, pk):
         """handle DELETE requests for games"""
         game = Game.objects.get(pk=pk)
+        self.check_object_permissions(request, game)
         game.delete()
         return Response(None, status=status.HTTP_204_NO_CONTENT)
 

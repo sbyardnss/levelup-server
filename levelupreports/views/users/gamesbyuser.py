@@ -9,12 +9,17 @@ class UserGameList(View):
     def get(self, request):
         with connection.cursor() as db_cursor:
             db_cursor.execute("""
-                SELECT 
-                    *,
-                    u.first_name || ' ' || u.last_name as `full_name`
-                FROM levelupapi_game g 
-                JOIN levelupapi_gamer ga on ga.id = g.gamer_id
-                JOIN auth_user u on ga.user_id = u.id
+                SELECT
+                    id,
+                    title,
+                    maker,
+                    type_id,
+                    number_of_players,
+                    skill_level,
+                    gamer_id,
+                    full_name
+                FROM
+                    GAMES_BY_USER
                 """)
             # Pass the db_cursor to the dict_fetch_all function to turn the fetch_all() response into a dictionary
             dataset = dict_fetch_all(db_cursor)
